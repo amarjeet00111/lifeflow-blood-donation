@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+
+{% block title %}Register as Donor - LifeFlow{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--secondary) 0%, #2a4a6e 100%);
+        padding: 60px 24px;
+        text-align: center;
+        color: var(--white);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .form-container {
+        max-width: 700px;
+        margin: -40px auto 60px;
+        padding: 0 24px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .form-card {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: var(--shadow);
+    }
+
+    .form-section {
+        margin-bottom: 32px;
+    }
+
+    .form-section h3 {
+        font-size: 1.2rem;
+        color: var(--secondary);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--background);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-section h3 i {
+        color: var(--primary);
+    }
+
+    .blood-group-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+
+    .blood-option {
+        position: relative;
+    }
+
+    .blood-option input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .blood-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .blood-option label:hover {
+        border-color: var(--primary);
+    }
+
+    .blood-option input:checked + label {
+        border-color: var(--primary);
+        background: rgba(230, 57, 70, 0.1);
+    }
+
+    .blood-option label .blood-icon {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .checkbox-group input {
+        width: 20px;
+        height: 20px;
+        margin-top: 3px;
+        accent-color: var(--primary);
+    }
+
+    .checkbox-group label {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+    .checkbox-group a {
+        color: var(--primary);
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 18px;
+        font-size: 1.1rem;
+        margin-top: 20px;
+    }
+
+    .form-footer {
+        text-align: center;
+        margin-top: 24px;
+        color: var(--text-secondary);
+    }
+
+    .form-footer a {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .required-note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+        padding: 12px 16px;
+        background: rgba(230, 57, 70, 0.1);
+        border-radius: 8px;
+        color: var(--primary);
+        font-size: 0.9rem;
+    }
+
+    .donors-list-section {
+        margin-top: 40px;
+        padding-top: 40px;
+        border-top: 2px solid var(--background);
+    }
+
+    .donors-list-section h3 {
+        font-size: 1.5rem;
+        color: var(--secondary);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .donors-list-section h3 i {
+        color: var(--primary);
+    }
+
+    .donors-count {
+        background: var(--primary);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin-left: auto;
+    }
+
+    .donors-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--white);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+    .donors-table th {
+        background: var(--secondary);
+        color: var(--white);
+        padding: 14px 16px;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .donors-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--background);
+    }
+
+    .donors-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .donors-table tr:hover {
+        background: rgba(230, 57, 70, 0.05);
+    }
+
+    .blood-type-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .blood-type-badge.o-negative { background: #fce4ec; color: #E63946; }
+    .blood-type-badge.o-positive { background: #fce4ec; color: #C62828; }
+    .blood-type-badge.a-negative { background: #e3f2fd; color: #1565C0; }
+    .blood-type-badge.a-positive { background: #e3f2fd; color: #0D47A1; }
+    .blood-type-badge.b-negative { background: #e8f5e9; color: #2E7D32; }
+    .blood-type-badge.b-positive { background: #e8f5e9; color: #1B5E20; }
+    .blood-type-badge.ab-negative { background: #f3e5f5; color: #7B1FA2; }
+    .blood-type-badge.ab-positive { background: #f3e5f5; color: #4A148C; }
+
+    .empty-donors {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+    }
+
+    .empty-donors i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .blood-group-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-card {
+            padding: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-user-plus"></i> Register as Donor</h1>
+    <p>Join our community of life-savers. Your donation can save up to 3 lives.</p>
+</div>
+
+<div class="form-container">
+    <div class="form-card">
+        <div class="required-note">
+            <i class="fas fa-info-circle"></i>
+            <span>All fields marked with * are required</span>
+        </div>
+
+        <form id="donorForm">
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+                
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+91 9876543210">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob" name="dob">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="">Select gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-tint"></i> Blood Group *</h3>
+                <div class="blood-group-grid">
+                    <div class="blood-option">
+                        <input type="radio" id="bg-o-negative" name="blood_group" value="O-" required>
+                        <label for="bg-o-negative">
+                            <span class="blood-icon">O-</span>
+                            <small>O Negative</small>
+                        </label>
+                    </div>
+                    <div class="blood-option">
+                        <input type="radio" id="bg-o-positive" name="blood_group" value="O+">
+                        <label for="bg-o-positive">
+                            <span class="blood-icon">O+</span>
+                            <small>O Positive</small>
+                        </label>
+                    </div>
+                    <div class="blood-option">
+                        <input type="radio" id="bg-a-negative" name="blood_group" value="A-">
+                        <label for="bg-a-negative">
+                            <span class="blood-icon">A-</span>
+                            <small>A Negative</small>
+                        </label>
+                    </div>
+                    <div class="blood-option">
+                        <input type="radio" id="bg-a-positive" name="blood_group" value="A+">
+                        <label for="bg-a-positive">
+                            <span class="blood-icon">A+</span>
+                            <small>A Positive</small>
+                        </label>
+                    </div>
+                    <div class="blood-option">
+                        <input type="radio" id="bg-b-negative" name="blood_group" value="B-">
+                        <label for="bg-b-negative">
+                            <span class="blood-icon">B-</span>
+                            <small>B Negative</small>
+                        </label>
+                    </div>
+                    <div class="blood-option">
+                        <input type="radio" id="bg-b-positive" name="blood_group" value="B+">
+                        <label for="bg-b-positive">
+                            <span class="blood-icon">B+</span>
+                            <small>B Positive</small>
+                        </label>
+                    </div>
+                    <div class="blood-option">
+                        <input type="radio" id="bg-ab-negative" name="blood_group" value="AB-">
+                        <label for="bg-ab-negative">
+                            <span class="blood-icon">AB-</span>
+                            <small>AB Negative</small>
+                        </label>
+                    </div>
+                    <div class="blood-option">
+                        <input type="radio" id="bg-ab-positive" name="blood_group" value="AB+">
+                        <label for="bg-ab-positive">
+                            <span class="blood-icon">AB+</span>
+                            <small>AB Positive</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-map-marker-alt"></i> Location</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" name="city" required placeholder="Enter city name">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State *</label>
+                        <input type="text" id="state" name="state" required placeholder="Enter state name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pincode">Pincode</label>
+                    <input type="text" id="pincode" name="pincode" placeholder="Enter pincode">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-file-medical"></i> Medical Information</h3>
+                
+                <div class="form-group">
+                    <label for="last_donation">Last Blood Donation Date (if any)</label>
+                    <input type="date" id="last_donation" name="last_donation">
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>. I confirm that all information provided is accurate.</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary submit-btn">
+                <i class="fas fa-heart"></i> Register as Donor
+            </button>
+        </form>
+
+        <div class="form-footer">
+            <p>Already registered? <a href="/search">Search for blood</a> instead</p>
+        </div>
+    </div>
+    
+    <div class="form-card" style="margin-top: 30px;">
+        <div class="donors-list-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+            <h3><i class="fas fa-users"></i> Registered Donors <span class="donors-count" id="donorsCount">Loading...</span></h3>
+            
+            <div id="donorsList">
+                <div class="empty-donors">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading donors...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function getBloodClass(blood) {
+        return blood.toLowerCase().replace('+', '-positive').replace('-', '-negative');
+    }
+    
+    async function loadDonors() {
+        try {
+            const response = await fetch('/api/donors');
+            const donors = await response.json();
+            
+            const countEl = document.getElementById('donorsCount');
+            const listEl = document.getElementById('donorsList');
+            
+            countEl.textContent = donors.length;
+            
+            if (donors.length === 0) {
+                listEl.innerHTML = '<div class="empty-donors"><i class="fas fa-user-slash"></i><p>No registered donors yet. Be the first to register!</p></div>';
+                return;
+            }
+            
+            listEl.innerHTML = '<table class="donors-table"><thead><tr><th>Name</th><th>Blood Group</th><th>City</th><th>State</th></tr></thead><tbody>' + 
+                donors.map(donor => '<tr><td>' + donor.name + '</td><td><span class="blood-type-badge ' + getBloodClass(donor.blood_group) + '">' + donor.blood_group + '</span></td><td>' + donor.city + '</td><td>' + donor.state + '</td></tr>').join('') + 
+                '</tbody></table>';
+        } catch (error) {
+            console.error('Error loading donors:', error);
+        }
+    }
+
+    document.getElementById('donorForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        if (data.phone.length < 10) {
+            showToast('Please enter a valid phone number', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/donors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast(result.message, 'success');
+                this.reset();
+                loadDonors();
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            showToast('An error occurred. Please try again.', 'error');
+            console.error('Error:', error);
+        }
+    });
+
+    loadDonors();
+</script>
+{% endblock %}

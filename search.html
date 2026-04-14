@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}Search Blood - LifeFlow{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, #ff6b6b 100%);
+        padding: 60px 24px;
+        text-align: center;
+        color: var(--white);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .search-container {
+        max-width: 1200px;
+        margin: -40px auto 60px;
+        padding: 0 24px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .search-card {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+    }
+
+    .search-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 16px;
+        align-items: end;
+    }
+
+    .search-form .form-group {
+        margin-bottom: 0;
+    }
+
+    .search-form button {
+        height: 50px;
+        padding: 0 30px;
+    }
+
+    .results-section {
+        margin-top: 40px;
+    }
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .results-header h3 {
+        font-size: 1.3rem;
+        color: var(--secondary);
+    }
+
+    .results-count {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .donors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+    }
+
+    .donor-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .donor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .donor-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--background);
+    }
+
+    .donor-avatar {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary), #ff6b6b);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .donor-info h4 {
+        font-size: 1.1rem;
+        color: var(--secondary);
+        margin-bottom: 4px;
+    }
+
+    .donor-info p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .donor-details {
+        flex: 1;
+        margin-bottom: 16px;
+    }
+
+    .detail-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+    }
+
+    .detail-row i {
+        color: var(--primary);
+        width: 20px;
+    }
+
+    .donor-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .donor-actions .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--text-secondary);
+    }
+
+    .no-results i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+
+    .no-results h3 {
+        margin-bottom: 10px;
+        color: var(--secondary);
+    }
+
+    @media (max-width: 768px) {
+        .search-form {
+            grid-template-columns: 1fr;
+        }
+
+        .donors-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-search"></i> Search Blood Donors</h1>
+    <p>Find compatible blood donors in your area</p>
+</div>
+
+<div class="search-container">
+    <div class="search-card">
+        <form class="search-form" id="searchForm">
+            <div class="form-group">
+                <label for="blood_group">Blood Group *</label>
+                <select id="blood_group" name="blood_group" required>
+                    <option value="">Select Blood Group</option>
+                    <option value="O-">O- (O Negative)</option>
+                    <option value="O+">O+ (O Positive)</option>
+                    <option value="A-">A- (A Negative)</option>
+                    <option value="A+">A+ (A Positive)</option>
+                    <option value="B-">B- (B Negative)</option>
+                    <option value="B+">B+ (B Positive)</option>
+                    <option value="AB-">AB- (AB Negative)</option>
+                    <option value="AB+">AB+ (AB Positive)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" placeholder="Enter city name">
+            </div>
+            <div class="form-group">
+                <label for="state">State</label>
+                <input type="text" id="state" name="state" placeholder="Enter state name">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
+    </div>
+
+    <div class="results-section">
+        <div class="results-header">
+            <h3>Available Donors</h3>
+            <span class="results-count" id="resultsCount"></span>
+        </div>
+        
+        <div class="donors-grid" id="donorsGrid">
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <h3>Search for Donors</h3>
+                <p>Select a blood group and click search to find donors</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('searchForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const bloodGroup = document.getElementById('blood_group').value;
+        const city = document.getElementById('city').value;
+        const state = document.getElementById('state').value;
+        
+        if (!bloodGroup) {
+            showToast('Please select a blood group', 'error');
+            return;
+        }
+        
+        // Build query params
+        const params = new URLSearchParams();
+        params.append('blood_group', bloodGroup);
+        if (city) params.append('city', city);
+        if (state) params.append('state', state);
+        
+        try {
+            const response = await fetch(`/api/search?${params}`);
+            const donors = await response.json();
+            
+            displayDonors(donors);
+        } catch (error) {
+            showToast('Error searching for donors', 'error');
+            console.error('Error:', error);
+        }
+    });
+
+    function displayDonors(donors) {
+        const grid = document.getElementById('donorsGrid');
+        const countEl = document.getElementById('resultsCount');
+        
+        if (donors.length === 0) {
+            grid.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-user-slash"></i>
+                    <h3>No Donors Found</h3>
+                    <p>No donors found matching your criteria. Try a different search.</p>
+                </div>
+            `;
+            countEl.textContent = '0 donors found';
+            return;
+        }
+        
+        countEl.textContent = `${donors.length} donor${donors.length !== 1 ? 's' : ''} found`;
+        
+        grid.innerHTML = donors.map(donor => `
+            <div class="donor-card">
+                <div class="donor-header">
+                    <div class="donor-avatar">${getInitials(donor.name)}</div>
+                    <div class="donor-info">
+                        <h4>${donor.name}</h4>
+                        <p>${donor.city}, ${donor.state}</p>
+                    </div>
+                </div>
+                <div class="donor-details">
+                    <div class="detail-row">
+                        <i class="fas fa-tint"></i>
+                        <span class="blood-badge blood-${getBloodClass(donor.blood_group)}" style="display: inline-flex; width: auto; height: auto; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem;">
+                            ${donor.blood_group}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <i class="fas fa-envelope"></i>
+                        <span>${donor.email}</span>
+                    </div>
+                    <div class="detail-row">
+                        <i class="fas fa-phone"></i>
+                        <span>${donor.phone}</span>
+                    </div>
+                    ${donor.pincode ? `
+                    <div class="detail-row">
+                        <i class="fas fa-map-pin"></i>
+                        <span>${donor.pincode}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="donor-actions">
+                    <a href="tel:${donor.phone}" class="btn btn-primary">
+                        <i class="fas fa-phone"></i> Call
+                    </a>
+                    <a href="mailto:${donor.email}" class="btn btn-secondary">
+                        <i class="fas fa-envelope"></i> Email
+                    </a>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function getInitials(name) {
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+
+    function getBloodClass(blood) {
+        return blood.toLowerCase().replace('+', 'positive').replace('-', 'negative').replace(' ', '-');
+    }
+</script>
+{% endblock %}

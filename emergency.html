@@ -1,0 +1,444 @@
+{% extends "base.html" %}
+
+{% block title %}Emergency Requests - LifeFlow{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #C62828 0%, #ef5350 100%);
+        padding: 60px 24px;
+        text-align: center;
+        color: var(--white);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .emergency-container {
+        max-width: 1200px;
+        margin: -40px auto 60px;
+        padding: 0 24px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .emergency-grid {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 30px;
+        align-items: start;
+    }
+
+    .request-form-card {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 100px;
+    }
+
+    .request-form-card h3 {
+        font-size: 1.3rem;
+        color: var(--secondary);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .request-form-card h3 i {
+        color: var(--primary);
+    }
+
+    .requests-list-card {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+    }
+
+    .requests-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .requests-header h3 {
+        font-size: 1.3rem;
+        color: var(--secondary);
+    }
+
+    .request-card {
+        background: var(--background);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--primary);
+        transition: all 0.3s ease;
+    }
+
+    .request-card:hover {
+        transform: translateX(5px);
+        box-shadow: var(--shadow);
+    }
+
+    .request-card.critical {
+        border-left-color: #C62828;
+        background: #ffebee;
+    }
+
+    .request-card.high {
+        border-left-color: #E65100;
+        background: #fff3e0;
+    }
+
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .patient-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--secondary);
+    }
+
+    .request-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .blood-group-badge {
+        background: var(--primary);
+        color: var(--white);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .units-badge {
+        background: var(--secondary);
+        color: var(--white);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .hospital-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+    }
+
+    .hospital-info i {
+        color: var(--primary);
+        margin-top: 4px;
+    }
+
+    .contact-info {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .contact-info a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: var(--white);
+        border-radius: 20px;
+        text-decoration: none;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .contact-info a:hover {
+        background: var(--primary);
+        color: var(--white);
+    }
+
+    .request-actions {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        gap: 10px;
+    }
+
+    .request-actions .btn {
+        flex: 1;
+        padding: 10px;
+        justify-content: center;
+    }
+
+    .no-requests {
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--text-secondary);
+    }
+
+    .no-requests i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+
+    .no-requests h3 {
+        margin-bottom: 10px;
+        color: var(--secondary);
+    }
+
+    @media (max-width: 992px) {
+        .emergency-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .request-form-card {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-exclamation-triangle"></i> Emergency Blood Requests</h1>
+    <p>Post or view emergency blood needs in your area</p>
+</div>
+
+<div class="emergency-container">
+    <div class="emergency-grid">
+        <!-- Post Request Form -->
+        <div class="request-form-card">
+            <h3><i class="fas fa-plus-circle"></i> Post Emergency Request</h3>
+            
+            <form id="emergencyForm">
+                <div class="form-group">
+                    <label for="patient_name">Patient Name *</label>
+                    <input type="text" id="patient_name" name="patient_name" required placeholder="Enter patient name">
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label for="blood_group">Blood Group *</label>
+                        <select id="blood_group" name="blood_group" required>
+                            <option value="">Select</option>
+                            <option value="O-">O-</option>
+                            <option value="O+">O+</option>
+                            <option value="A-">A-</option>
+                            <option value="A+">A+</option>
+                            <option value="B-">B-</option>
+                            <option value="B+">B+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="AB+">AB+</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="units">Units Needed *</label>
+                        <input type="number" id="units" name="units" required min="1" max="10" placeholder="1-10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="hospital_name">Hospital Name *</label>
+                    <input type="text" id="hospital_name" name="hospital_name" required placeholder="Enter hospital name">
+                </div>
+
+                <div class="form-group">
+                    <label for="hospital_address">Hospital Address</label>
+                    <input type="text" id="hospital_address" name="hospital_address" placeholder="Enter hospital address">
+                </div>
+
+                <div class="form-group">
+                    <label for="contact_person">Contact Person *</label>
+                    <input type="text" id="contact_person" name="contact_person" required placeholder="Your name">
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label for="phone">Phone *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+91 9876543210">
+                    </div>
+                    <div class="form-group">
+                        <label for="urgency">Urgency *</label>
+                        <select id="urgency" name="urgency" required>
+                            <option value="">Select</option>
+                            <option value="critical">Critical</option>
+                            <option value="high">High</option>
+                            <option value="normal">Normal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="required_date">Required Date</label>
+                    <input type="date" id="required_date" name="required_date">
+                </div>
+
+                <button type="submit" class="btn btn-primary submit-btn" style="width: 100%;">
+                    <i class="fas fa-paper-plane"></i> Post Request
+                </button>
+            </form>
+        </div>
+
+        <!-- Requests List -->
+        <div class="requests-list-card">
+            <div class="requests-header">
+                <h3><i class="fas fa-list"></i> Active Requests</h3>
+            </div>
+            
+            <div id="requestsList">
+                {% if requests %}
+                    {% for req in requests %}
+                    <div class="request-card {{ req.urgency }}">
+                        <div class="request-header">
+                            <span class="patient-name">{{ req.patient_name }}</span>
+                            <span class="urgency-badge {{ req.urgency }}">{{ req.urgency|title }}</span>
+                        </div>
+                        <div class="request-meta">
+                            <span class="blood-group-badge">{{ req.blood_group }}</span>
+                            <span class="units-badge">{{ req.units }} Units</span>
+                            {% if req.required_date %}
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                                <i class="far fa-calendar"></i> {{ req.required_date }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="hospital-info">
+                            <i class="fas fa-hospital"></i>
+                            <div>
+                                <strong>{{ req.hospital_name }}</strong>
+                                {% if req.hospital_address %}<br>{{ req.hospital_address }}{% endif %}
+                            </div>
+                        </div>
+                        <div class="contact-info">
+                            <a href="tel:{{ req.phone }}">
+                                <i class="fas fa-phone"></i> {{ req.phone }}
+                            </a>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                                <i class="fas fa-user"></i> {{ req.contact_person }}
+                            </span>
+                        </div>
+                        <div class="request-actions">
+                            <button onclick="completeRequest({ reqid })" class="btn btn-primary">
+                                <i class="fas fa-check-circle"></i> Blood Collected
+                            </button>
+                            <button onclick="cancelRequest({ reqid })" class="btn btn-secondary">
+                                <i class="fas fa-times-circle"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="no-requests">
+                    <i class="fas fa-clipboard-check"></i>
+                    <h3>No Active Requests</h3>
+                    <p>There are no emergency requests at the moment.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('emergencyForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch('/api/emergency-requests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast(result.message, 'success');
+                this.reset();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            showToast('An error occurred. Please try again.', 'error');
+            console.error('Error:', error);
+        }
+    });
+
+    async function completeRequest(id) {
+        if (!confirm('Has blood been collected for this request?')) return;
+        
+        try {
+            const response = await fetch('/api/emergency-requests/' + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'complete' })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Request marked as completed!', 'success');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            showToast('Error completing request', 'error');
+        }
+    }
+
+    async function cancelRequest(id) {
+        if (!confirm('Are you sure you want to cancel this request?')) return;
+        
+        try {
+            const response = await fetch('/api/emergency-requests/' + id, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'cancel' })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('Request cancelled!', 'success');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            showToast('Error cancelling request', 'error');
+        }
+    }
+</script>
+{% endblock %}
